@@ -51,8 +51,6 @@ function Pathfinder:HeightOffGround()
 
 	if Humanoid.RigType == Enum.HumanoidRigType.R6 then
 
-		local LeftLeg
-
 		for _, Child in next, Humanoid.RootPart.Parent:GetChildren() do
 
 			if Humanoid:GetLimb(Child) == Enum.Limb.LeftLeg then
