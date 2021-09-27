@@ -38,7 +38,7 @@ function Pathfinder.new(Humanoid: Humanoid, AgentParamaters: {[string]: any}?)
 	Object.ErrorRange = 0
 	
 	Object.AlwaysMove = false
-	
+		
 	return Object
 	
 end
@@ -217,11 +217,11 @@ function Pathfinder:RunLogic(TimeDelta: number)
 			if self.Waypoint + 1 == #Waypoints then
 				
 				Humanoid:MoveTo(self.Goal)
-				
+								
 			else
 			
 				Humanoid:MoveTo(NextWaypoint.Position)
-				
+								
 			end
 			
 		end
@@ -274,7 +274,7 @@ end
 
 function Pathfinder:Start(Goal: Vector3?)
 	
-	assert(not self.Connection and not self.BlockedConnection, "Pathfinder object is already active!")
+	assert(not self.Connection, "Pathfinder object is already active!")
 	
 	self.Connection = Heartbeat:Connect(function(td)
 		self:RunLogic(td)
@@ -282,7 +282,7 @@ function Pathfinder:Start(Goal: Vector3?)
 	
 	self.BlockedConnection = self.Path.Blocked:Connect(function(Node)
 		
-		if not self.ReachedDestination then
+		if self.Goal and not self.ReachedDestination then
 		
 			if Node > self.Waypoint and Node <= self.GoalWaypoint then
 				
@@ -296,6 +296,28 @@ function Pathfinder:Start(Goal: Vector3?)
 		
 	end)
 	
+	self.MovingConnection = self.Humanoid.MoveToFinished:Connect(function(Done)	
+		
+		local Waypoints = self.Path:GetWaypoints()
+		
+		local Len = #Waypoints
+		
+		if Len > 0 and Len > self.Waypoint and Waypoints[self.Waypoint + 1].Position == self.Humanoid.WalkToPoint then
+			
+			if Done then
+				
+				self.Waypoint = self.Waypoint + 1
+				
+			elseif self.Goal then
+				
+				self:InstantApplyGoal(self.Goal)
+				
+			end
+			
+		end
+					
+	end)
+	
 	if Goal then
 		self:InstantApplyGoal(Goal)
 	end
@@ -304,7 +326,7 @@ end
 
 function Pathfinder:Stop()
 	
-	assert(self.Connection and self.BlockedConnection, "Pathfinder object is not active!")
+	assert(self.Connection, "Pathfinder object is not active!")
 	
 	self.Connection:Disconnect()
 	
@@ -313,6 +335,10 @@ function Pathfinder:Stop()
 	self.BlockedConnection:Disconnect()
 	
 	self.BlockedConnection = nil
+	
+	self.MovingConnection:Disconnect()
+	
+	self.MovingConnection = nil
 	
 	self:RemoveGoal()
 	
