@@ -75,7 +75,7 @@ end
 
 function Pathfinder:AtNode(Node: Vector3, TimeDelta: number): boolean
 	
-	local HeightDiff = math.max(math.abs(Node.Y + self:HeightOffGround() - self.Humanoid.RootPart.Position.Y) - 1 ,0)
+	local HeightDiff = Node.Y + self:HeightOffGround() - self.Humanoid.RootPart.Position.Y
 		
 	return (self:GetDifference(Node) + Vector3.new(0, HeightDiff, 0)).Magnitude <= TimeDelta*self.Humanoid.WalkSpeed*2
 	
@@ -192,7 +192,7 @@ function Pathfinder:RunLogic(TimeDelta: number)
 	
 	if self:WithinErrorRange(self.Goal) then
 		
-		Humanoid:Move(ZERO)
+		Humanoid:MoveTo(Humanoid.RootPart.Position)
 		
 		self.ReachedDestination = true
 	
@@ -227,6 +227,8 @@ function Pathfinder:RunLogic(TimeDelta: number)
 		end
 		
 	elseif self.AlwaysMove then
+		
+		Humanoid:MoveTo(Humanoid.RootPart.Position)
 		
 		Humanoid:Move(self:GetDifference(self.Goal))
 		
@@ -266,7 +268,7 @@ function Pathfinder:RemoveGoal()
 
 	if not Humanoid or not Humanoid.RootPart then return end
 	
-	Humanoid:Move(ZERO)
+	Humanoid:MoveTo(Humanoid.RootPart.Position)
 	
 end
 
